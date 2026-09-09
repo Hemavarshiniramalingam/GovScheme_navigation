@@ -1,0 +1,244 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Personalized Schemes Results — GovScheme Navigator{% endblock %}
+
+{% block content %}
+<!-- Results Page Header / Profile Summary Strip -->
+<section class="results-page-header">
+  <div class="container results-header-flex">
+    <div>
+      <div style="font-size:0.775rem; text-transform:uppercase; letter-spacing:0.06em; font-weight:700; color:var(--gov-blue-primary); margin-bottom:4px;">
+        🏛️ Verified Citizen Eligibility Profile
+      </div>
+      <h2 style="font-size:1.5rem; font-weight:800; color:var(--gov-navy);">
+        Your Personalized Government Schemes
+      </h2>
+      <div class="citizen-profile-summary">
+        <span class="profile-pill">👤 {{ profile_data.age_group }} Yrs</span>
+        <span class="profile-pill">🎓 {{ profile_data.education_level|title }}</span>
+        <span class="profile-pill">💼 {{ profile_data.occupation|title }}</span>
+        <span class="profile-pill">📍 {{ profile_data.state }}</span>
+        <span class="profile-pill">💰 {{ profile_data.income_bracket|title }}</span>
+        <span class="profile-pill">🏷️ {{ profile_data.specific_category|title }}</span>
+      </div>
+    </div>
+
+    <div>
+      <a href="{% url 'schemes:home' %}" class="btn-secondary" style="font-size:0.875rem;">
+        ✏️ Edit Intake Answers
+      </a>
+    </div>
+  </div>
+</section>
+
+<div class="container results-layout">
+  
+  <!-- Filter Sidebar -->
+  <aside class="filter-sidebar" role="complementary" aria-label="Filter Schemes">
+    <div class="filter-title">
+      <span>Filter Results</span>
+      <a href="{% url 'schemes:results' %}?age_group={{ profile_data.age_group }}&education_level={{ profile_data.education_level }}&occupation={{ profile_data.occupation }}&state={{ profile_data.state }}&income_bracket={{ profile_data.income_bracket }}&specific_category={{ profile_data.specific_category }}" style="font-size:0.75rem; color:var(--gov-blue-primary); text-decoration:none; font-weight:600;">Reset</a>
+    </div>
+
+    <!-- Search input -->
+    <form method="GET" action="{% url 'schemes:results' %}" style="margin-bottom:20px;">
+      <input type="hidden" name="age_group" value="{{ profile_data.age_group }}">
+      <input type="hidden" name="education_level" value="{{ profile_data.education_level }}">
+      <input type="hidden" name="occupation" value="{{ profile_data.occupation }}">
+      <input type="hidden" name="state" value="{{ profile_data.state }}">
+      <input type="hidden" name="income_bracket" value="{{ profile_data.income_bracket }}">
+      <input type="hidden" name="specific_category" value="{{ profile_data.specific_category }}">
+      <input type="hidden" name="sector" value="{{ sector_filter }}">
+      <input type="hidden" name="level" value="{{ level_filter }}">
+
+      <div class="form-group" style="margin-bottom:8px;">
+        <input type="text" name="q" value="{{ query }}" placeholder="Search keyword or code..." class="form-input" style="font-size:0.85rem; padding:8px 12px;">
+      </div>
+      <button type="submit" class="btn-primary" style="padding:8px 12px; font-size:0.85rem; width:100%;">Filter</button>
+    </form>
+
+    <!-- Sector Category Filter -->
+    <div class="filter-group">
+      <h4>Public Sector</h4>
+      <ul class="filter-list">
+        <li class="filter-item">
+          <a href="{% url 'schemes:results' %}?age_group={{ profile_data.age_group }}&education_level={{ profile_data.education_level }}&occupation={{ profile_data.occupation }}&state={{ profile_data.state }}&income_bracket={{ profile_data.income_bracket }}&specific_category={{ profile_data.specific_category }}&sector=ALL&level={{ level_filter }}" class="filter-link {% if sector_filter == 'ALL' or not sector_filter %}active{% endif %}">
+            <span>All Sectors</span>
+          </a>
+        </li>
+        {% for s in sectors %}
+        <li class="filter-item">
+          <a href="{% url 'schemes:results' %}?age_group={{ profile_data.age_group }}&education_level={{ profile_data.education_level }}&occupation={{ profile_data.occupation }}&state={{ profile_data.state }}&income_bracket={{ profile_data.income_bracket }}&specific_category={{ profile_data.specific_category }}&sector={{ s }}&level={{ level_filter }}" class="filter-link {% if sector_filter == s %}active{% endif %}">
+            <span>{{ s }}</span>
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <!-- Government Level Filter -->
+    <div class="filter-group">
+      <h4>Jurisdiction Level</h4>
+      <ul class="filter-list">
+        <li class="filter-item">
+          <a href="{% url 'schemes:results' %}?age_group={{ profile_data.age_group }}&education_level={{ profile_data.education_level }}&occupation={{ profile_data.occupation }}&state={{ profile_data.state }}&income_bracket={{ profile_data.income_bracket }}&specific_category={{ profile_data.specific_category }}&sector={{ sector_filter }}&level=ALL" class="filter-link {% if level_filter == 'ALL' or not level_filter %}active{% endif %}">
+            <span>All Schemes</span>
+          </a>
+        </li>
+        <li class="filter-item">
+          <a href="{% url 'schemes:results' %}?age_group={{ profile_data.age_group }}&education_level={{ profile_data.education_level }}&occupation={{ profile_data.occupation }}&state={{ profile_data.state }}&income_bracket={{ profile_data.income_bracket }}&specific_category={{ profile_data.specific_category }}&sector={{ sector_filter }}&level=CENTRAL" class="filter-link {% if level_filter == 'CENTRAL' %}active{% endif %}">
+            <span>Central Government</span>
+          </a>
+        </li>
+        <li class="filter-item">
+          <a href="{% url 'schemes:results' %}?age_group={{ profile_data.age_group }}&education_level={{ profile_data.education_level }}&occupation={{ profile_data.occupation }}&state={{ profile_data.state }}&income_bracket={{ profile_data.income_bracket }}&specific_category={{ profile_data.specific_category }}&sector={{ sector_filter }}&level=STATE" class="filter-link {% if level_filter == 'STATE' %}active{% endif %}">
+            <span>State Specific</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </aside>
+
+  <!-- Main Matching Schemes Content -->
+  <main class="schemes-results-main">
+    
+    <!-- Results summary count banner -->
+    <div style="background:#FFFFFF; border:1px solid var(--border-light); border-radius:var(--radius-md); padding:16px 20px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+      <div>
+        <span style="font-size:1.15rem; font-weight:800; color:var(--status-success);">
+          {{ eligible_count }} Schemes
+        </span>
+        <span style="font-size:0.9rem; color:var(--text-main); font-weight:600;"> you genuinely qualify for</span>
+        <span style="font-size:0.8rem; color:var(--text-muted);"> (out of {{ total_evaluated }} schemes evaluated)</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-size:0.775rem; color:var(--text-muted);">Engine Verification:</span>
+        <span style="font-size:0.75rem; background:var(--status-success-bg); color:var(--status-success); font-weight:700; padding:3px 8px; border-radius:4px; border:1px solid rgba(30,126,52,0.3);">
+          ⚡ AST Rules & NLP Checked
+        </span>
+      </div>
+    </div>
+
+    <!-- Eligible Schemes List -->
+    {% if eligible_schemes %}
+      {% for item in eligible_schemes %}
+      <article class="scheme-card eligible" id="scheme-{{ item.scheme.code }}">
+        <div class="scheme-card-header">
+          <div>
+            <span class="scheme-code-badge">{{ item.scheme.code }} • {{ item.scheme.sector_category }}</span>
+            <h3 class="scheme-title">{{ item.scheme.name }}</h3>
+            <div class="ministry-tag">
+              <span>🏛️</span> {{ item.scheme.ministry }}
+              {% if item.scheme.level == 'STATE' %}
+                <span style="background:#FEF3C7; color:#92400E; padding:1px 6px; border-radius:4px; font-weight:600; font-size:0.7rem;">State Scheme: {{ item.scheme.state_scope }}</span>
+              {% else %}
+                <span style="background:var(--gov-blue-soft); color:var(--gov-blue-primary); padding:1px 6px; border-radius:4px; font-weight:600; font-size:0.7rem;">Central (All-India)</span>
+              {% endif %}
+            </div>
+          </div>
+          <div class="match-badge success">
+            <span>✓</span> {{ item.status_tag }} ({{ item.match_score }}%)
+          </div>
+        </div>
+
+        <!-- Highlighted benefit -->
+        <div class="benefit-highlight-box">
+          <div class="benefit-icon">🪙</div>
+          <div>
+            <div style="font-size:0.725rem; text-transform:uppercase; color:var(--text-muted); font-weight:700;">Financial & Welfare Benefit</div>
+            <div class="benefit-text">{{ item.scheme.benefit_highlight }}</div>
+          </div>
+        </div>
+
+        <!-- Plain Language Summary -->
+        <p style="font-size:0.9rem; color:var(--text-main); margin-bottom:14px; line-height:1.5;">
+          {{ item.scheme.plain_language_summary }}
+        </p>
+
+        <!-- Plain Language "Why You Qualify" breakdown -->
+        <div class="plain-language-reasons">
+          <div class="reason-title">Plain Language Qualification Breakdown:</div>
+          <ul class="reasons-list">
+            {% for reason in item.matched_reasons %}
+            <li class="reason-item pass">
+              <span>{{ reason }}</span>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+
+        <div class="scheme-card-footer">
+          <div class="meta-badges">
+            <span class="meta-badge">📄 <strong>{{ item.document_count }}</strong> Docs Required</span>
+            <span class="meta-badge">⏳ <strong>{{ item.scheme.deadline_text }}</strong></span>
+            <span class="meta-badge">🏢 <strong>{{ item.scheme.official_portal_name }}</strong></span>
+          </div>
+
+          <div class="card-actions">
+            <a href="{% url 'schemes:scheme_detail' item.scheme.code %}" class="btn-secondary" style="font-size:0.85rem; padding:8px 14px;">
+              📖 Plain Guide & Docs
+            </a>
+            <button onclick="openQuickApplyModal('{{ item.scheme.code }}', '{{ item.scheme.name|escapejs }}')" class="btn-primary" style="font-size:0.85rem; padding:8px 16px;">
+              🚀 1-Click Apply & Track
+            </button>
+          </div>
+        </div>
+      </article>
+      {% endfor %}
+    {% else %}
+      <div style="background:#FFFFFF; border:1px solid var(--border-light); border-radius:var(--radius-md); padding:40px; text-align:center;">
+        <div style="font-size:2.5rem; margin-bottom:12px;">🔍</div>
+        <h4 style="color:var(--gov-navy); font-size:1.2rem; font-weight:700;">No Direct Matches with Current Filter</h4>
+        <p style="color:var(--text-muted); font-size:0.9rem; max-width:480px; margin:8px auto 20px;">
+          Try resetting sector filters or modifying your intake answers (e.g. changing income or education profile).
+        </p>
+        <a href="{% url 'schemes:home' %}" class="btn-primary" style="display:inline-flex; padding:10px 20px;">Edit Intake Answers</a>
+      </div>
+    {% endif %}
+
+    <!-- Other Evaluated Schemes (Disqualified / Missing criteria) -->
+    {% if other_schemes %}
+      <div style="margin-top:48px; border-top:2px solid var(--border-light); padding-top:32px;">
+        <h3 style="font-size:1.25rem; font-weight:700; color:var(--text-muted); margin-bottom:16px;">
+          Other Schemes in Catalog (Criteria Not Met for Current Profile)
+        </h3>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:20px;">
+          These schemes were evaluated by the rule engine. We transparently show why they do not match your current circumstances.
+        </p>
+
+        {% for item in other_schemes %}
+        <article class="scheme-card not-eligible" style="margin-bottom:16px;">
+          <div class="scheme-card-header">
+            <div>
+              <span class="scheme-code-badge" style="background:#F1F5F9; color:#64748B;">{{ item.scheme.code }} • {{ item.scheme.sector_category }}</span>
+              <h4 style="font-size:1.05rem; font-weight:700; color:var(--text-main);">{{ item.scheme.name }}</h4>
+              <div class="ministry-tag">{{ item.scheme.ministry }}</div>
+            </div>
+            <div class="match-badge" style="background:#F1F5F9; color:#64748B;">
+              {{ item.match_score }}% Match (Not Qualified)
+            </div>
+          </div>
+
+          <div style="background:#FFF5F5; border:1px solid #FED7D7; border-radius:var(--radius-sm); padding:10px 14px; margin:10px 0; font-size:0.825rem;">
+            <div style="font-weight:700; color:#C53030; margin-bottom:4px;">Why Not Qualified:</div>
+            <ul style="list-style:none; padding-left:0;">
+              {% for unmet in item.unmet_reasons %}
+              <li style="color:#C53030; margin-bottom:2px;">⚠️ {{ unmet }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; margin-top:10px;">
+            <a href="{% url 'schemes:scheme_detail' item.scheme.code %}" class="btn-secondary" style="font-size:0.775rem; padding:6px 12px;">
+              View General Criteria &rarr;
+            </a>
+          </div>
+        </article>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+  </main>
+</div>
+{% endblock %}

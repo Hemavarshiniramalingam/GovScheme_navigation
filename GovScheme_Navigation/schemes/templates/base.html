@@ -1,0 +1,197 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}GovScheme Navigator — National Citizen Scheme Discovery Platform{% endblock %}</title>
+  
+  <!-- Inter Font & Material Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="{% static 'css/gov_style.css' %}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+  <!-- National Tricolor Top Accent -->
+  <div class="national-stripe" aria-hidden="true"></div>
+
+  <!-- Accessibility & Government Bar -->
+  <header class="top-utility-bar" role="region" aria-label="Accessibility and Portal Identification">
+    <div class="container top-bar-content">
+      <div class="gov-indicator">
+        <span class="gov-flag">🇮🇳</span>
+        <span>GOVERNMENT OF INDIA • CITIZEN DIGITAL SERVICES INITIATIVE</span>
+      </div>
+      <div class="accessibility-controls">
+        <span style="color:#94A3B8; font-size:0.75rem; margin-right:4px;">Text Size:</span>
+        <button class="access-btn active" id="fontNormalBtn" title="Default Font Size">A</button>
+        <button class="access-btn" id="fontLargeBtn" title="Large Font Size">A+</button>
+        <button class="access-btn" id="fontXLargeBtn" title="Extra Large Font Size">A++</button>
+        <button class="access-btn" id="toggleContrastBtn" title="Toggle High Contrast Mode">⚡ High Contrast</button>
+        <span style="color:rgba(255,255,255,0.3); margin:0 4px;">|</span>
+        <span style="font-size:0.75rem; font-weight:600; color:var(--gov-saffron);">English / हिंदी</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Navigation Header -->
+  <nav class="main-header" role="navigation" aria-label="Main Navigation">
+    <div class="container header-inner">
+      <a href="{% url 'schemes:home' %}" class="portal-brand">
+        <div class="national-emblem-badge" title="National Scheme Portal Seal">
+          🏛️
+        </div>
+        <div class="brand-text">
+          <h1>GovScheme Navigator <span style="font-size:0.75rem; background:rgba(255,153,51,0.2); color:var(--gov-saffron); padding:2px 8px; border-radius:4px; font-weight:600; border:1px solid rgba(255,153,51,0.4);">OFFICIAL BETA</span></h1>
+          <div class="brand-tagline">National Intelligent Eligibility Matching & Scheme Lifecycle Platform</div>
+        </div>
+      </a>
+
+      <ul class="nav-menu">
+        <li><a href="{% url 'schemes:home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a></li>
+        <li><a href="{% url 'schemes:results' %}" class="nav-link {% if request.resolver_match.url_name == 'results' %}active{% endif %}">Find Schemes</a></li>
+        <li><a href="{% url 'schemes:track_status' %}" class="nav-link {% if request.resolver_match.url_name == 'track_status' %}active{% endif %}">Track Status</a></li>
+        <li><a href="{% url 'schemes:blueprint' %}" class="nav-link {% if request.resolver_match.url_name == 'blueprint' %}active{% endif %}">System Architecture</a></li>
+        <li>
+          <button class="notif-bell-btn" id="openNotifDrawerBtn" title="View Recent Notifications">
+            🔔 Alerts <span class="notif-badge" id="notifCountBadge">3</span>
+          </button>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Main Page Content Block -->
+  <main id="mainContent">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Quick Apply Simulation Modal -->
+  <div id="quickApplyModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.6); z-index:3000; align-items:center; justify-content:center; padding:20px; backdrop-filter:blur(3px);">
+    <div style="background:#FFFFFF; border-radius:var(--radius-lg); width:100%; max-width:540px; box-shadow:var(--shadow-xl); overflow:hidden; border:1px solid var(--border-medium);">
+      <div style="background:var(--gov-navy); color:#FFFFFF; padding:18px 24px; display:flex; justify-content:space-between; align-items:center; border-bottom:3px solid var(--gov-saffron);">
+        <h3 style="font-size:1.15rem; font-weight:700; display:flex; align-items:center; gap:8px;">
+          <span>📝</span> 1-Click Assisted Application
+        </h3>
+        <button onclick="closeQuickApplyModal()" style="background:transparent; border:none; color:#FFF; font-size:1.4rem; cursor:pointer;">&times;</button>
+      </div>
+      <div style="padding:24px;">
+        <div style="background:var(--gov-blue-soft); padding:12px 16px; border-radius:var(--radius-sm); margin-bottom:18px; border:1px solid rgba(26,86,148,0.2);">
+          <div style="font-size:0.75rem; text-transform:uppercase; color:var(--text-muted); font-weight:700;">Selected Scheme</div>
+          <div id="modalSchemeName" style="font-weight:700; color:var(--gov-navy); font-size:1rem;">Scheme Name</div>
+        </div>
+
+        <input type="hidden" id="modalSchemeCode">
+
+        <div class="form-group">
+          <label class="form-label">Full Name of Beneficiary / Applicant <span class="required-star">*</span></label>
+          <input type="text" id="modalApplicantName" class="form-input" placeholder="e.g. Ramesh Kumar" value="Ramesh Kumar">
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Mobile Number (for SMS & WhatsApp) <span class="required-star">*</span></label>
+            <input type="tel" id="modalApplicantPhone" class="form-input" placeholder="+91 98765 43210" value="+91 98765 43210">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email Address (Optional)</label>
+            <input type="email" id="modalApplicantEmail" class="form-input" placeholder="citizen@example.gov.in" value="ramesh.k@example.gov.in">
+          </div>
+        </div>
+
+        <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:20px; line-height:1.4;">
+          🔒 <strong>Gov-Secured Transmission:</strong> By proceeding, a unique government application tracking token will be assigned to your profile and verification records will be synced.
+        </div>
+
+        <div style="display:flex; gap:10px; justify-content:flex-end;">
+          <button onclick="closeQuickApplyModal()" class="btn-secondary">Cancel</button>
+          <button id="confirmQuickApplyBtn" class="btn-primary" style="flex:none; padding:12px 24px;">Submit Official Application</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide-Out Notification Drawer -->
+  <div class="notification-drawer-overlay" id="notifOverlay"></div>
+  <aside class="notification-drawer" id="notifDrawer" aria-label="Notification Center">
+    <div class="drawer-header">
+      <h3><span>🔔</span> Citizen Alert Center</h3>
+      <button class="drawer-close-btn" id="closeNotifDrawerBtn" aria-label="Close notification drawer">&times;</button>
+    </div>
+    <div class="drawer-body" id="notifList">
+      <!-- Injected via JavaScript -->
+      <p style="color:var(--text-muted); text-align:center; padding:20px 0;">Loading alerts...</p>
+    </div>
+  </aside>
+
+  <!-- Authoritative Modern Footer -->
+  <footer class="main-footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+            <span style="font-size:1.8rem;">🏛️</span>
+            <div>
+              <h4 style="margin-bottom:2px; font-size:1.05rem;">GovScheme Navigator</h4>
+              <div style="font-size:0.75rem; color:#94A3B8;">National Citizen Scheme Discovery & Tracking Gateway</div>
+            </div>
+          </div>
+          <p style="font-size:0.825rem; line-height:1.6; margin-bottom:14px;">
+            An integrated government initiative designed to ensure every citizen discovers and claims schemes they are rightfully entitled to without bureaucratic friction or legal complexity.
+          </p>
+          <div style="display:flex; gap:8px; font-size:0.75rem;">
+            <span style="background:rgba(255,255,255,0.08); padding:4px 8px; border-radius:4px;">🔒 256-Bit SSL Encrypted</span>
+            <span style="background:rgba(255,255,255,0.08); padding:4px 8px; border-radius:4px;">✅ DigiLocker Verified</span>
+          </div>
+        </div>
+
+        <div class="footer-col">
+          <h4>Key Portals</h4>
+          <ul class="footer-links">
+            <li><a href="https://india.gov.in" target="_blank" rel="noopener">National Portal of India ↗</a></li>
+            <li><a href="https://myscheme.gov.in" target="_blank" rel="noopener">myScheme Gateway ↗</a></li>
+            <li><a href="https://www.digilocker.gov.in" target="_blank" rel="noopener">DigiLocker Vault ↗</a></li>
+            <li><a href="https://scholarships.gov.in" target="_blank" rel="noopener">National Scholarship Portal ↗</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Quick Navigation</h4>
+          <ul class="footer-links">
+            <li><a href="{% url 'schemes:home' %}">Scheme Discovery Wizard</a></li>
+            <li><a href="{% url 'schemes:results' %}">All Cataloged Schemes</a></li>
+            <li><a href="{% url 'schemes:track_status' %}">Application Tracking</a></li>
+            <li><a href="{% url 'schemes:blueprint' %}">Technical Specifications</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>National Helpdesk</h4>
+          <p style="font-size:0.825rem; margin-bottom:6px;">Toll-Free Citizen Helpline:</p>
+          <p style="font-size:1.15rem; font-weight:800; color:var(--gov-saffron); margin-bottom:10px;">1800-115-555</p>
+          <p style="font-size:0.775rem; color:#94A3B8;">Operational 24x7 in 12 Regional Indian Languages</p>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>
+          © 2026 GovScheme Navigator. Content owned & maintained by Ministry of Electronics & IT, Government of India.
+        </div>
+        <div style="display:flex; gap:16px;">
+          <a href="#" style="color:#94A3B8; text-decoration:none;">Privacy Policy</a>
+          <a href="#" style="color:#94A3B8; text-decoration:none;">Terms of Service</a>
+          <a href="#" style="color:#94A3B8; text-decoration:none;">Hyperlink Policy</a>
+          <a href="#" style="color:#94A3B8; text-decoration:none;">Accessibility Statement</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="{% static 'js/gov_app.js' %}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

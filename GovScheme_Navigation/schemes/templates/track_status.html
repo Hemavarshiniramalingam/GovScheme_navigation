@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Application Status Tracker — GovScheme Navigator{% endblock %}
+
+{% block content %}
+<div class="container tracker-container">
+
+  <!-- Search Card -->
+  <div class="search-tracker-card">
+    <div style="font-size:0.775rem; text-transform:uppercase; letter-spacing:0.06em; font-weight:700; color:var(--gov-blue-primary); margin-bottom:4px;">
+      🔍 Official Government Verification Gateway
+    </div>
+    <h2 style="font-size:1.6rem; font-weight:800; color:var(--gov-navy);">
+      Track Scheme Application Status
+    </h2>
+    <p style="font-size:0.9rem; color:var(--text-muted); margin-top:4px;">
+      Enter your Application Number (e.g. <code>APP-KISAN-2026-8942</code>) or Government Portal Reference ID to view live stage progression.
+    </p>
+
+    <form method="GET" action="{% url 'schemes:track_status' %}" class="tracker-search-input-group">
+      <input type="text" name="app_num" value="{{ app_num }}" class="form-input" placeholder="Enter Application Number (e.g. APP-KISAN-2026-8942)" required style="font-weight:700; font-size:1.05rem; letter-spacing:0.02em;">
+      <button type="submit" class="btn-primary" style="flex:none; padding:12px 28px;">Track Application</button>
+    </form>
+
+    <!-- Clickable Quick-Test Chips -->
+    <div style="margin-top:16px; font-size:0.8rem; color:var(--text-muted); display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+      <strong style="color:var(--gov-navy);">Sample Live Applications:</strong>
+      {% for sa in sample_apps %}
+      <a href="{% url 'schemes:track_status' %}?app_num={{ sa.application_number }}" class="profile-pill" style="text-decoration:none;">
+        {{ sa.scheme.code }} ({{ sa.get_current_status_display }})
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+
+  {% if error_message %}
+    <div style="background:#FEF2F2; border:1.5px solid #F87171; border-radius:var(--radius-md); padding:20px; text-align:center; margin-bottom:28px;">
+      <div style="font-size:1.8rem; margin-bottom:6px;">⚠️</div>
+      <h4 style="color:#991B1B; font-weight:700; margin-bottom:4px;">Application Not Found</h4>
+      <p style="color:#B91C1C; font-size:0.9rem;">{{ error_message }}</p>
+    </div>
+  {% endif %}
+
+  {% if application %}
+  <!-- Main Active Status Card -->
+  <article class="status-card-main" id="statusCard">
+    <div class="status-header-strip">
+      <div>
+        <span class="scheme-code-badge">{{ application.scheme.code }} • Reference: {{ application.application_number }}</span>
+        <h3 style="font-size:1.5rem; font-weight:800; color:var(--gov-navy); margin-top:4px;">
+          {{ application.scheme.name }}
+        </h3>
+        <div style="font-size:0.85rem; color:var(--text-muted); margin-top:6px; display:flex; gap:16px; flex-wrap:wrap;">
+          <span>👤 <strong>Applicant:</strong> {{ application.applicant_name }}</span>
+          <span>📅 <strong>Submitted:</strong> {{ application.submitted_at|date:"d M Y, h:i A" }}</span>
+          <span>🏛️ <strong>Backend Ref:</strong> {{ application.official_portal_ref }}</span>
+        </div>
+      </div>
+
+      <div>
+        {% if application.current_status == 'SANCTIONED' or application.current_status == 'DISBURSED' %}
+          <div class="match-badge success" style="font-size:0.95rem; padding:8px 16px;">
+            ✓ {{ application.get_current_status_display }}
+          </div>
+        {% elif application.current_status == 'ACTION_REQUIRED' %}
+          <div class="match-badge" style="background:#FEE2E2; color:#B91C1C; border:1px solid #F87171; font-size:0.95rem; padding:8px 16px;">
+            ⚠️ Action Required by Citizen
+          </div>
+        {% else %}
+          <div class="match-badge warning" style="font-size:0.95rem; padding:8px 16px;">
+            ⏳ {{ application.get_current_status_display }}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Sanctioned Benefit Highlight Strip -->
+    <div class="benefit-highlight-box" style="margin-bottom:28px;">
+      <div class="benefit-icon">🪙</div>
+      <div>
+        <div style="font-size:0.75rem; text-transform:uppercase; color:var(--text-muted); font-weight:700;">Scheme Benefit Allocation</div>
+        <div class="benefit-text">{{ application.benefit_amount }}</div>
+      </div>
+    </div>
+
+    <!-- 5-Stage Visual Stepper -->
+    <div style="margin:30px 0;">
+      <div style="font-size:0.85rem; font-weight:700; color:var(--gov-navy); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:12px;">
+        Lifecycle Progression (Stage {{ stage_index }} of 5)
+      </div>
+
+      <div class="stepper-horizontal">
+        <div class="stepper-progress-fill" style="width: {% if stage_index == 1 %}0%{% elif stage_index == 2 %}25%{% elif stage_index == 3 %}50%{% elif stage_index == 4 %}75%{% elif stage_index == 5 %}100%{% else %}25%{% endif %};"></div>
+
+        <!-- Stage 1: Submitted -->
+        <div class="step-item {% if stage_index > 1 %}completed{% elif stage_index == 1 %}active{% endif %}">
+          <div class="step-circle">{% if stage_index > 1 %}✓{% else %}1{% endif %}</div>
+          <div class="step-label">1. Submitted</div>
+          <div class="step-subtext">Received & Token Generated</div>
+        </div>
+
+        <!-- Stage 2: Document Verification -->
+        <div class="step-item {% if stage_index > 2 %}completed{% elif stage_index == 2 %}{% if application.current_status == 'ACTION_REQUIRED' %}action-req{% else %}active{% endif %}{% endif %}">
+          <div class="step-circle">{% if stage_index > 2 %}✓{% elif application.current_status == 'ACTION_REQUIRED' %}!{% else %}2{% endif %}</div>
+          <div class="step-label">2. Verification</div>
+          <div class="step-subtext">Document Scrutiny Desk</div>
+        </div>
+
+        <!-- Stage 3: Field Inspection -->
+        <div class="step-item {% if stage_index > 3 %}completed{% elif stage_index == 3 %}active{% endif %}">
+          <div class="step-circle">{% if stage_index > 3 %}✓{% else %}3{% endif %}</div>
+          <div class="step-label">3. Field Check</div>
+          <div class="step-subtext">Site / Land Inspection</div>
+        </div>
+
+        <!-- Stage 4: Sanction Order -->
+        <div class="step-item {% if stage_index > 4 %}completed{% elif stage_index == 4 %}active{% endif %}">
+          <div class="step-circle">{% if stage_index > 4 %}✓{% else %}4{% endif %}</div>
+          <div class="step-label">4. Sanctioned</div>
+          <div class="step-subtext">Approval Letter Issued</div>
+        </div>
+
+        <!-- Stage 5: Benefit Disbursal -->
+        <div class="step-item {% if stage_index == 5 %}completed{% endif %}">
+          <div class="step-circle">{% if stage_index == 5 %}✓{% else %}5{% endif %}</div>
+          <div class="step-label">5. Disbursed</div>
+          <div class="step-subtext">PFMS / DBT Direct Credit</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Urgent Action Required Banner (if any) -->
+    {% if application.current_status == 'ACTION_REQUIRED' %}
+    <div class="action-required-alert">
+      <div style="font-size:1.8rem; color:#B91C1C;">⚠️</div>
+      <div style="flex:1;">
+        <h4 style="color:#991B1B; font-size:1rem; font-weight:700; margin-bottom:4px;">Immediate Citizen Action Required</h4>
+        <p style="color:#7F1D1D; font-size:0.875rem; margin-bottom:10px;">
+          The verification desk requires you to resubmit or clarify a document. Please review the officer's remarks below.
+        </p>
+        <button class="btn-primary" style="background:#B91C1C; font-size:0.85rem; padding:8px 16px;" onclick="alert('Document re-upload gateway simulated. Updated copy queued for officer verification.')">
+          📤 Upload Corrected Document
+        </button>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Audit History / Officer Remarks Timeline -->
+    <div style="margin-top:36px; border-top:1px solid var(--border-light); padding-top:28px;">
+      <h4 style="font-size:1.15rem; font-weight:700; color:var(--gov-navy); margin-bottom:20px; display:flex; align-items:center; gap:8px;">
+        <span>📜</span> Verification Activity & Officer Remarks Log
+      </h4>
+
+      <div class="timeline-logs">
+        {% for log in history_logs %}
+        <div class="timeline-entry {% if forloop.last %}latest{% endif %}">
+          <div class="timeline-entry-title">{{ log.title }}</div>
+          <div class="timeline-entry-date">{{ log.timestamp|date:"d M Y, h:i A" }} • Authorized By: <strong>{{ log.updated_by }}</strong></div>
+          <div class="timeline-entry-remarks">
+            {{ log.officer_remarks }}
+            {% if log.action_required_note %}
+              <div style="margin-top:6px; color:#B91C1C; font-weight:600; font-size:0.8rem;">
+                📌 Action Required: {{ log.action_required_note }}
+              </div>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Live Stage Transition Simulator for Reviewers -->
+    <div class="simulator-box">
+      <h4><span>⚙️</span> Interactive Reviewer Stage Simulator (Live Notification Trigger)</h4>
+      <p style="font-size:0.825rem; color:var(--text-muted); margin-bottom:12px;">
+        Click any stage below to simulate government backend state transitions and watch instant multi-channel alerts log in the Alert Drawer!
+      </p>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button onclick="simulateStatusChange('{{ application.application_number }}', 'DOCUMENT_VERIFICATION', 'Desk scrutiny initiated. Aadhaar and eligibility documents under review.')" class="btn-secondary" style="font-size:0.775rem; padding:6px 12px;">
+          Set: Verification
+        </button>
+        <button onclick="simulateStatusChange('{{ application.application_number }}', 'FIELD_INSPECTION', 'Field inspection team dispatched for site validation.')" class="btn-secondary" style="font-size:0.775rem; padding:6px 12px;">
+          Set: Field Inspection
+        </button>
+        <button onclick="simulateStatusChange('{{ application.application_number }}', 'ACTION_REQUIRED', 'Missing clear copy of income certificate.', 'Please upload fresh income certificate signed by Tahsildar.')" class="btn-secondary" style="font-size:0.775rem; padding:6px 12px; color:#B91C1C;">
+          Trigger: Action Required
+        </button>
+        <button onclick="simulateStatusChange('{{ application.application_number }}', 'SANCTIONED', 'Sanction Order #SO-2026-GOV generated. Forwarded to PFMS for DBT disbursal.')" class="btn-secondary" style="font-size:0.775rem; padding:6px 12px; color:var(--status-success); font-weight:700;">
+          Set: Sanctioned
+        </button>
+        <button onclick="simulateStatusChange('{{ application.application_number }}', 'DISBURSED', 'Funds transferred via PFMS direct benefit transfer to Aadhaar-seeded bank account.')" class="btn-secondary" style="font-size:0.775rem; padding:6px 12px; background:var(--status-success-bg); color:var(--status-success); font-weight:700;">
+          Set: Disbursed
+        </button>
+      </div>
+    </div>
+
+  </article>
+  {% endif %}
+
+</div>
+{% endblock %}

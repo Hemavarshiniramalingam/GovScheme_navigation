@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}System Architecture & Technical Blueprint — GovScheme Navigator{% endblock %}
+
+{% block content %}
+<div class="container" style="padding:40px 20px 80px;">
+
+  <div style="background:#FFFFFF; border:1px solid var(--border-light); border-radius:var(--radius-lg); padding:32px; box-shadow:var(--shadow-sm); margin-bottom:32px;">
+    <span class="scheme-code-badge">TECHNICAL BLUEPRINT • SYSTEM ARCHITECTURE</span>
+    <h2 style="font-size:1.85rem; font-weight:800; color:var(--gov-navy); margin-top:4px; margin-bottom:8px;">
+      GovScheme Navigator Technical Specification
+    </h2>
+    <p style="font-size:0.95rem; color:var(--text-muted); max-width:850px; line-height:1.6;">
+      Complete architectural blueprint covering tech stack layers, ERD data models, AST rule matching logic, NLP legal-to-plain language translation pipeline, multi-channel notification bus, and portal differentiation matrix.
+    </p>
+  </div>
+
+  <!-- 1. System Architecture Layers -->
+  <section style="background:#FFFFFF; border:1px solid var(--border-light); border-radius:var(--radius-md); padding:28px; margin-bottom:28px;">
+    <h3 style="font-size:1.3rem; font-weight:700; color:var(--gov-navy); margin-bottom:16px;">
+      1. Layered Application Architecture
+    </h3>
+    
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:16px;">
+      <div style="background:#F8FAFC; border:1px solid var(--border-medium); border-radius:var(--radius-sm); padding:16px;">
+        <div style="font-weight:700; color:var(--gov-blue-primary); margin-bottom:6px;">🖥️ Presentation Layer</div>
+        <p style="font-size:0.825rem; color:var(--text-main); line-height:1.5;">
+          • WCAG 2.1 AA Compliant Gov Design System<br>
+          • Accessibility Toolbar (High Contrast, Font Scaling)<br>
+          • 6-Step Dynamic Citizen Intake Wizard<br>
+          • 5-Stage Live Visual Lifecycle Stepper
+        </p>
+      </div>
+
+      <div style="background:#F8FAFC; border:1px solid var(--border-medium); border-radius:var(--radius-sm); padding:16px;">
+        <div style="font-weight:700; color:var(--gov-blue-primary); margin-bottom:6px;">⚙️ Engine & Logic Layer</div>
+        <p style="font-size:0.825rem; color:var(--text-main); line-height:1.5;">
+          • Deterministic AST Rule Evaluation Engine<br>
+          • Multi-criteria Scoring & Qualification Weighting<br>
+          • NLP Legal-to-Plain Language Translator<br>
+          • Flesch-Kincaid Citizen Readability Benchmark
+        </p>
+      </div>
+
+      <div style="background:#F8FAFC; border:1px solid var(--border-medium); border-radius:var(--radius-sm); padding:16px;">
+        <div style="font-weight:700; color:var(--gov-blue-primary); margin-bottom:6px;">🗄️ Data & Integration Layer</div>
+        <p style="font-size:0.825rem; color:var(--text-main); line-height:1.5;">
+          • Relational Schemes & Rule Trees Schema<br>
+          • Multi-Channel Notification Dispatcher<br>
+          • DigiLocker & PFMS Integration Stubs<br>
+          • Session-based Citizen Profile Persistence
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. Core Data Models Matrix -->
+  <section style="background:#FFFFFF; border:1px solid var(--border-light); border-radius:var(--radius-md); padding:28px; margin-bottom:28px;">
+    <h3 style="font-size:1.3rem; font-weight:700; color:var(--gov-navy); margin-bottom:16px;">
+      2. Database Schema Specification (ERD Entities)
+    </h3>
+    
+    <div style="overflow-x:auto;">
+      <table style="width:100%; border-collapse:collapse; font-size:0.85rem; text-align:left;">
+        <thead>
+          <tr style="background:var(--gov-navy); color:#FFFFFF;">
+            <th style="padding:10px 14px; border-top-left-radius:var(--radius-sm);">Model Name</th>
+            <th style="padding:10px 14px;">Key Attributes & Types</th>
+            <th style="padding:10px 14px;">Relationships</th>
+            <th style="padding:10px 14px; border-top-right-radius:var(--radius-sm);">Functional Role</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid var(--border-light);">
+            <td style="padding:10px 14px; font-weight:700;"><code>CitizenProfile</code></td>
+            <td style="padding:10px 14px;"><code>id, age_group, education_level, occupation, state, income_bracket, specific_category</code></td>
+            <td style="padding:10px 14px;">1:N with ApplicationRecord, 1:N with NotificationLog</td>
+            <td style="padding:10px 14px;">Persists normalized intake parameters across citizen exploration.</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border-light); background:#F8FAFC;">
+            <td style="padding:10px 14px; font-weight:700;"><code>Scheme</code></td>
+            <td style="padding:10px 14px;"><code>code, name, ministry, level, sector, legal_description, plain_language_summary, benefit_highlight, deadline</code></td>
+            <td style="padding:10px 14px;">1:N with EligibilityRule, 1:N with DocumentRequirement, 1:N with ApplicationRecord</td>
+            <td style="padding:10px 14px;">Central repository of statutory provisions & plain citizen guides.</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border-light);">
+            <td style="padding:10px 14px; font-weight:700;"><code>EligibilityRule</code></td>
+            <td style="padding:10px 14px;"><code>rule_field, operator, expected_values, legal_clause_text, plain_language_rule, is_mandatory</code></td>
+            <td style="padding:10px 14px;">N:1 with Scheme</td>
+            <td style="padding:10px 14px;">Atomic rule criteria evaluated by the AST engine.</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border-light); background:#F8FAFC;">
+            <td style="padding:10px 14px; font-weight:700;"><code>DocumentRequirement</code></td>
+            <td style="padding:10px 14px;"><code>document_name, why_required, issuing_authority, is_mandatory, digilocker_available</code></td>
+            <td style="padding:10px 14px;">N:1 with Scheme</td>
+            <td style="padding:10px 14px;">Checklist generator with issuance authorities & DigiLocker readiness.</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border-light);">
+            <td style="padding:10px 14px; font-weight:700;"><code>ApplicationRecord</code></td>
+            <td style="padding:10px 14px;"><code>application_number, current_status, status_summary, official_portal_ref, benefit_amount</code></td>
+            <td style="padding:10px 14px;">N:1 with Scheme, 1:N with StatusHistory</td>
+            <td style="padding:10px 14px;">Unique lifecycle tracking token for 5-stage progress monitoring.</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border-light); background:#F8FAFC;">
+            <td style="padding:10px 14px; font-weight:700;"><code>StatusHistory</code></td>
+            <td style="padding:10px 14px;"><code>stage, title, officer_remarks, action_required_note, updated_by, timestamp</code></td>
+            <td style="padding:10px 14px;">N:1 with ApplicationRecord</td>
+            <td style="padding:10px 14px;">Audit trail logging every desk verification remark and stage step.</td>
+          </tr>
+          <tr>
+            <td style="padding:10px 14px; font-weight:700;"><code>NotificationLog</code></td>
+            <td style="padding:10px 14px;"><code>notification_type, channel, title, message, action_url, is_read, created_at</code></td>
+            <td style="padding:10px 14px;">N:1 with CitizenProfile & ApplicationRecord</td>
+            <td style="padding:10px 14px;">Multi-channel alert record (SMS, WhatsApp, Email, In-App).</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 3. Differentiation Matrix -->
+  <section style="background:#FFFFFF; border:1px solid var(--border-light); border-radius:var(--radius-md); padding:28px;">
+    <h3 style="font-size:1.3rem; font-weight:700; color:var(--gov-navy); margin-bottom:16px;">
+      3. Value Matrix: How GovScheme Navigator Differs from Traditional Government Portals
+    </h3>
+    
+    <div style="overflow-x:auto;">
+      <table style="width:100%; border-collapse:collapse; font-size:0.85rem; text-align:left;">
+        <thead>
+          <tr style="background:var(--gov-navy); color:#FFFFFF;">
+            <th style="padding:10px 14px; border-top-left-radius:var(--radius-sm);">Feature Dimension</th>
+            <th style="padding:10px 14px;">Traditional Portals (myScheme / State Portals)</th>
+            <th style="padding:10px 14px; border-top-right-radius:var(--radius-sm); background:var(--status-success);">GovScheme Navigator Approach</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid var(--border-light);">
+            <td style="padding:10px 14px; font-weight:700;">Language & Clarity</td>
+            <td style="padding:10px 14px; color:#64748B;">Complex, legalistic gazette text and bureaucratic jargon (Flesch score &lt; 35).</td>
+            <td style="padding:10px 14px; font-weight:600; color:var(--status-success);">NLP Legal-to-Plain translation with Flesch Readability &gt; 75 (Grade 6 comprehension).</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border-light); background:#F8FAFC;">
+            <td style="padding:10px 14px; font-weight:700;">Eligibility Verification</td>
+            <td style="padding:10px 14px; color:#64748B;">Users must read multi-page PDF guidelines manually to verify if they qualify.</td>
+            <td style="padding:10px 14px; font-weight:600; color:var(--status-success);">Deterministic AST Matching Engine gives exact "Why you qualify" reasoning and match score.</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border-light);">
+            <td style="padding:10px 14px; font-weight:700;">Lifecycle Tracking</td>
+            <td style="padding:10px 14px; color:#64748B;">Redirects out to disconnected department portals with separate logins and forgotten tokens.</td>
+            <td style="padding:10px 14px; font-weight:600; color:var(--status-success);">Unified 5-Stage Stepper with real-time audit remarks, token lookup, and action-required alerts.</td>
+          </tr>
+          <tr style="background:#F8FAFC;">
+            <td style="padding:10px 14px; font-weight:700;">Citizen Notifications</td>
+            <td style="padding:10px 14px; color:#64748B;">No proactive push alerts; citizens miss crucial deadlines and document upload requests.</td>
+            <td style="padding:10px 14px; font-weight:600; color:var(--status-success);">Event-driven notification bus across In-App drawer, WhatsApp API, SMS, and Email.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</div>
+{% endblock %}

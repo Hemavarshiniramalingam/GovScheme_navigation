@@ -1,0 +1,387 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}GovScheme Navigator — National Citizen Eligibility Gateway{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+  <div class="container hero-grid">
+    <div class="hero-content">
+      <div class="hero-title-badge">
+        <span>🇮🇳</span> Central & State Government Schemes • Unified Citizen Engine
+      </div>
+      <h2>Discover Every Government Scheme <span>You Qualify For</span> in 60 Seconds</h2>
+      <p class="hero-subtitle">
+        We convert complex gazette acts and legal requirements into plain, conversational terms. Answer 6 basic questions to unlock personalized grants, scholarships, subsidies, and welfare benefits.
+      </p>
+
+      <div class="hero-highlights">
+        <div class="highlight-item"><span>⚡</span> 100% Deterministic Rule Engine</div>
+        <div class="highlight-item"><span>📖</span> Plain-Language Explanations</div>
+        <div class="highlight-item"><span>🔔</span> Real-Time Application Tracking</div>
+      </div>
+
+      <div class="hero-stats-row">
+        <div class="stat-box">
+          <div class="stat-number">{{ total_schemes }}</div>
+          <div class="stat-label">Active Schemes Cataloged</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-number">₹10 Lakh</div>
+          <div class="stat-label">Max Available Subsidy/Grant</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-number">100%</div>
+          <div class="stat-label">Plain Language Guarantee</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Intake Card Wizard -->
+    <div class="intake-card" id="intakeCard">
+      <div class="intake-header">
+        <h3><span>📋</span> Citizen Eligibility Questionnaire</h3>
+        <p>Answer 6 simple personal profile questions to get your verified list.</p>
+      </div>
+
+      <div class="form-step-tracker">
+        <div class="step-line"></div>
+        <div class="step-node active" id="node1">1</div>
+        <div class="step-node" id="node2">2</div>
+        <div class="step-node" id="node3">3</div>
+        <div class="step-node" id="node4">4</div>
+        <div class="step-node" id="node5">5</div>
+        <div class="step-node" id="node6">6</div>
+      </div>
+
+      <form id="citizenIntakeForm" action="{% url 'schemes:results' %}" method="GET">
+        
+        <!-- Step 1: Age Group -->
+        <div class="wizard-step-panel" id="stepPanel1">
+          <div class="form-group">
+            <label class="form-label">Step 1 of 6: What is your Age Group? <span class="required-star">*</span></label>
+            <div class="option-chips-grid">
+              <div>
+                <input type="radio" name="age_group" id="age1" value="0-17" class="chip-radio">
+                <label for="age1" class="chip-label">Under 18</label>
+              </div>
+              <div>
+                <input type="radio" name="age_group" id="age2" value="18-25" class="chip-radio" checked>
+                <label for="age2" class="chip-label">18 – 25 Yrs</label>
+              </div>
+              <div>
+                <input type="radio" name="age_group" id="age3" value="26-40" class="chip-radio">
+                <label for="age3" class="chip-label">26 – 40 Yrs</label>
+              </div>
+              <div>
+                <input type="radio" name="age_group" id="age4" value="41-59" class="chip-radio">
+                <label for="age4" class="chip-label">41 – 59 Yrs</label>
+              </div>
+              <div>
+                <input type="radio" name="age_group" id="age5" value="60+" class="chip-radio">
+                <label for="age5" class="chip-label">60+ (Senior)</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2: Education Level -->
+        <div class="wizard-step-panel" id="stepPanel2" style="display:none;">
+          <div class="form-group">
+            <label class="form-label">Step 2 of 6: Highest Education Level Completed? <span class="required-star">*</span></label>
+            <div class="option-chips-grid">
+              <div>
+                <input type="radio" name="education_level" id="edu1" value="none" class="chip-radio">
+                <label for="edu1" class="chip-label">No Formal School</label>
+              </div>
+              <div>
+                <input type="radio" name="education_level" id="edu2" value="10th_pass" class="chip-radio">
+                <label for="edu2" class="chip-label">10th Standard</label>
+              </div>
+              <div>
+                <input type="radio" name="education_level" id="edu3" value="12th_pass" class="chip-radio" checked>
+                <label for="edu3" class="chip-label">12th Standard</label>
+              </div>
+              <div>
+                <input type="radio" name="education_level" id="edu4" value="diploma_iti" class="chip-radio">
+                <label for="edu4" class="chip-label">ITI / Diploma</label>
+              </div>
+              <div>
+                <input type="radio" name="education_level" id="edu5" value="graduate" class="chip-radio">
+                <label for="edu5" class="chip-label">Graduate Degree</label>
+              </div>
+              <div>
+                <input type="radio" name="education_level" id="edu6" value="postgraduate" class="chip-radio">
+                <label for="edu6" class="chip-label">Post Graduate</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3: Occupation / Profession -->
+        <div class="wizard-step-panel" id="stepPanel3" style="display:none;">
+          <div class="form-group">
+            <label class="form-label">Step 3 of 6: Current Occupation or Profession? <span class="required-star">*</span></label>
+            <div class="option-chips-grid">
+              <div>
+                <input type="radio" name="occupation" id="occ1" value="farmer" class="chip-radio" checked>
+                <label for="occ1" class="chip-label">🌾 Farmer / Agri</label>
+              </div>
+              <div>
+                <input type="radio" name="occupation" id="occ2" value="student" class="chip-radio">
+                <label for="occ2" class="chip-label">🎓 Student</label>
+              </div>
+              <div>
+                <input type="radio" name="occupation" id="occ3" value="business_owner" class="chip-radio">
+                <label for="occ3" class="chip-label">💼 Small Business</label>
+              </div>
+              <div>
+                <input type="radio" name="occupation" id="occ4" value="gig_worker" class="chip-radio">
+                <label for="occ4" class="chip-label">🛵 Daily / Gig Worker</label>
+              </div>
+              <div>
+                <input type="radio" name="occupation" id="occ5" value="salaried" class="chip-radio">
+                <label for="occ5" class="chip-label">👔 Salaried Employee</label>
+              </div>
+              <div>
+                <input type="radio" name="occupation" id="occ6" value="unemployed" class="chip-radio">
+                <label for="occ6" class="chip-label">🔍 Unemployed</label>
+              </div>
+              <div>
+                <input type="radio" name="occupation" id="occ7" value="homemaker" class="chip-radio">
+                <label for="occ7" class="chip-label">🏡 Homemaker</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 4: State / Location -->
+        <div class="wizard-step-panel" id="stepPanel4" style="display:none;">
+          <div class="form-group">
+            <label class="form-label">Step 4 of 6: Your State / Union Territory? <span class="required-star">*</span></label>
+            <select name="state" class="form-select">
+              <option value="Uttar Pradesh" selected>Uttar Pradesh</option>
+              <option value="Maharashtra">Maharashtra</option>
+              <option value="Bihar">Bihar</option>
+              <option value="Madhya Pradesh">Madhya Pradesh</option>
+              <option value="Rajasthan">Rajasthan</option>
+              <option value="Gujarat">Gujarat</option>
+              <option value="Karnataka">Karnataka</option>
+              <option value="Tamil Nadu">Tamil Nadu</option>
+              <option value="West Bengal">West Bengal</option>
+              <option value="Delhi">Delhi (NCT)</option>
+              <option value="Punjab">Punjab</option>
+              <option value="Haryana">Haryana</option>
+              <option value="Andhra Pradesh">Andhra Pradesh</option>
+              <option value="Telangana">Telangana</option>
+              <option value="Kerala">Kerala</option>
+              <option value="Odisha">Odisha</option>
+              <option value="Assam">Assam</option>
+              <option value="Jharkhand">Jharkhand</option>
+              <option value="Chhattisgarh">Chhattisgarh</option>
+              <option value="Uttarakhand">Uttarakhand</option>
+              <option value="Himachal Pradesh">Himachal Pradesh</option>
+              <option value="Jammu and Kashmir">Jammu & Kashmir</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Step 5: Annual Income Bracket -->
+        <div class="wizard-step-panel" id="stepPanel5" style="display:none;">
+          <div class="form-group">
+            <label class="form-label">Step 5 of 6: Total Annual Household Income? <span class="required-star">*</span></label>
+            <div class="option-chips-grid">
+              <div>
+                <input type="radio" name="income_bracket" id="inc1" value="bpl" class="chip-radio">
+                <label for="inc1" class="chip-label">BPL (&lt; ₹1 Lakh)</label>
+              </div>
+              <div>
+                <input type="radio" name="income_bracket" id="inc2" value="low_income" class="chip-radio" checked>
+                <label for="inc2" class="chip-label">₹1L – ₹2.5 Lakh</label>
+              </div>
+              <div>
+                <input type="radio" name="income_bracket" id="inc3" value="lower_middle" class="chip-radio">
+                <label for="inc3" class="chip-label">₹2.5L – ₹5 Lakh</label>
+              </div>
+              <div>
+                <input type="radio" name="income_bracket" id="inc4" value="middle" class="chip-radio">
+                <label for="inc4" class="chip-label">₹5L – ₹8 Lakh</label>
+              </div>
+              <div>
+                <input type="radio" name="income_bracket" id="inc5" value="higher" class="chip-radio">
+                <label for="inc5" class="chip-label">Above ₹8 Lakh</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 6: Specific Social Status / Category -->
+        <div class="wizard-step-panel" id="stepPanel6" style="display:none;">
+          <div class="form-group">
+            <label class="form-label">Step 6 of 6: Specific Status or Category? <span class="required-star">*</span></label>
+            <div class="option-chips-grid">
+              <div>
+                <input type="radio" name="specific_category" id="cat1" value="general" class="chip-radio" checked>
+                <label for="cat1" class="chip-label">General Category</label>
+              </div>
+              <div>
+                <input type="radio" name="specific_category" id="cat2" value="obc" class="chip-radio">
+                <label for="cat2" class="chip-label">OBC (Non-Creamy)</label>
+              </div>
+              <div>
+                <input type="radio" name="specific_category" id="cat3" value="sc" class="chip-radio">
+                <label for="cat3" class="chip-label">Scheduled Caste (SC)</label>
+              </div>
+              <div>
+                <input type="radio" name="specific_category" id="cat4" value="st" class="chip-radio">
+                <label for="cat4" class="chip-label">Scheduled Tribe (ST)</label>
+              </div>
+              <div>
+                <input type="radio" name="specific_category" id="cat5" value="woman_entrepreneur" class="chip-radio">
+                <label for="cat5" class="chip-label">👩 Woman Founder</label>
+              </div>
+              <div>
+                <input type="radio" name="specific_category" id="cat6" value="pwd" class="chip-radio">
+                <label for="cat6" class="chip-label">♿ Differently Abled (PwD)</label>
+              </div>
+              <div>
+                <input type="radio" name="specific_category" id="cat7" value="minority" class="chip-radio">
+                <label for="cat7" class="chip-label">Minority Community</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn-secondary" id="wizardPrevBtn" style="display:none;">&larr; Back</button>
+          <button type="button" class="btn-primary" id="wizardNextBtn">Next Question &rarr;</button>
+          <button type="submit" class="btn-primary" id="wizardSubmitBtn" style="display:none; background:linear-gradient(135deg, var(--status-success) 0%, #0E6B06 100%);">
+            🚀 Calculate My Eligible Schemes
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- Quick Application Status Tracker Banner -->
+<section style="background:#FFFFFF; border-bottom:1px solid var(--border-light); padding:28px 0;">
+  <div class="container">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:20px;">
+      <div style="max-width:500px;">
+        <h3 style="color:var(--gov-navy); font-size:1.15rem; font-weight:700; margin-bottom:4px;">
+          🔎 Already Applied for a Scheme?
+        </h3>
+        <p style="font-size:0.85rem; color:var(--text-muted);">
+          Enter your Application Reference ID to view live 5-stage verification progress and officer remarks.
+        </p>
+      </div>
+
+      <form action="{% url 'schemes:track_status' %}" method="GET" style="display:flex; gap:8px; flex:1; max-width:480px;">
+        <input type="text" name="app_num" class="form-input" placeholder="e.g. APP-KISAN-2026-8942" required style="font-weight:600; text-transform:uppercase;">
+        <button type="submit" class="btn-primary" style="flex:none; padding:10px 20px;">Track Live</button>
+      </form>
+    </div>
+
+    <!-- Quick Sample Clickable Application IDs -->
+    <div style="margin-top:14px; font-size:0.8rem; color:var(--text-muted); display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+      <strong style="color:var(--gov-navy);">Sample Test IDs:</strong>
+      <a href="{% url 'schemes:track_status' %}?app_num=APP-KISAN-2026-8942" class="profile-pill" style="text-decoration:none;">PM-Kisan (Sanctioned)</a>
+      <a href="{% url 'schemes:track_status' %}?app_num=APP-SCHOLAR-2026-1049" class="profile-pill" style="text-decoration:none;">Scholarship (Verification)</a>
+      <a href="{% url 'schemes:track_status' %}?app_num=APP-PMEGP-2026-5521" class="profile-pill" style="text-decoration:none;">PMEGP Loan (Inspection)</a>
+      <a href="{% url 'schemes:track_status' %}?app_num=APP-MAHILA-2026-9012" class="profile-pill" style="text-decoration:none; background:var(--status-warning-bg); color:var(--status-warning);">Mahila Udyami (Action Required)</a>
+    </div>
+  </div>
+</section>
+
+<!-- Sector Explorer -->
+<section style="padding:48px 0; background:var(--bg-canvas);">
+  <div class="container">
+    <div style="text-align:center; max-width:680px; margin:0 auto 36px;">
+      <h3 style="font-size:1.6rem; font-weight:800; color:var(--gov-navy);">Browse Schemes by Public Sector</h3>
+      <p style="font-size:0.9rem; color:var(--text-muted); margin-top:6px;">
+        Explore schemes across major government departments and mission directorates.
+      </p>
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:16px;">
+      <a href="{% url 'schemes:results' %}?sector=Agriculture" style="background:#FFFFFF; border:1px solid var(--border-light); border-radius:var(--radius-md); padding:20px; text-decoration:none; color:inherit; text-align:center; transition:all 0.2s;" onmouseover="this.style.borderColor='var(--gov-blue-primary)'" onmouseout="this.style.borderColor='var(--border-light)'">
+        <div style="font-size:2rem; margin-bottom:8px;">🌾</div>
+        <div style="font-weight:700; color:var(--gov-navy); font-size:1rem;">Agriculture & Farming</div>
+        <div style="font-size:0.775rem; color:var(--text-muted); margin-top:4px;">PM-Kisan, Subsidies</div>
+      </a>
+
+      <a href="{% url 'schemes:results' %}?sector=Business" style="background:#FFFFFF; border:1px solid var(--border-light); border-radius:var(--radius-md); padding:20px; text-decoration:none; color:inherit; text-align:center; transition:all 0.2s;" onmouseover="this.style.borderColor='var(--gov-blue-primary)'" onmouseout="this.style.borderColor='var(--border-light)'">
+        <div style="font-size:2rem; margin-bottom:8px;">💼</div>
+        <div style="font-weight:700; color:var(--gov-navy); font-size:1rem;">MSME & Business</div>
+        <div style="font-size:0.775rem; color:var(--text-muted); margin-top:4px;">PMEGP, Mudra, Grants</div>
+      </a>
+
+      <a href="{% url 'schemes:results' %}?sector=Education" style="background:#FFFFFF; border:1px solid var(--border-light); border-radius:var(--radius-md); padding:20px; text-decoration:none; color:inherit; text-align:center; transition:all 0.2s;" onmouseover="this.style.borderColor='var(--gov-blue-primary)'" onmouseout="this.style.borderColor='var(--border-light)'">
+        <div style="font-size:2rem; margin-bottom:8px;">🎓</div>
+        <div style="font-weight:700; color:var(--gov-navy); font-size:1rem;">Education & Scholarships</div>
+        <div style="font-size:0.775rem; color:var(--text-muted); margin-top:4px;">NSP, Fee Waivers</div>
+      </a>
+
+      <a href="{% url 'schemes:results' %}?sector=Healthcare" style="background:#FFFFFF; border:1px solid var(--border-light); border-radius:var(--radius-md); padding:20px; text-decoration:none; color:inherit; text-align:center; transition:all 0.2s;" onmouseover="this.style.borderColor='var(--gov-blue-primary)'" onmouseout="this.style.borderColor='var(--border-light)'">
+        <div style="font-size:2rem; margin-bottom:8px;">🏥</div>
+        <div style="font-weight:700; color:var(--gov-navy); font-size:1rem;">Healthcare & Insurance</div>
+        <div style="font-size:0.775rem; color:var(--text-muted); margin-top:4px;">Ayushman Bharat Cover</div>
+      </a>
+
+      <a href="{% url 'schemes:results' %}?sector=Housing" style="background:#FFFFFF; border:1px solid var(--border-light); border-radius:var(--radius-md); padding:20px; text-decoration:none; color:inherit; text-align:center; transition:all 0.2s;" onmouseover="this.style.borderColor='var(--gov-blue-primary)'" onmouseout="this.style.borderColor='var(--border-light)'">
+        <div style="font-size:2rem; margin-bottom:8px;">🏠</div>
+        <div style="font-weight:700; color:var(--gov-navy); font-size:1rem;">Housing & Urban/Rural</div>
+        <div style="font-size:0.775rem; color:var(--text-muted); margin-top:4px;">PM Awas Pucca Homes</div>
+      </a>
+
+      <a href="{% url 'schemes:results' %}?sector=Green Energy" style="background:#FFFFFF; border:1px solid var(--border-light); border-radius:var(--radius-md); padding:20px; text-decoration:none; color:inherit; text-align:center; transition:all 0.2s;" onmouseover="this.style.borderColor='var(--gov-blue-primary)'" onmouseout="this.style.borderColor='var(--border-light)'">
+        <div style="font-size:2rem; margin-bottom:8px;">☀️</div>
+        <div style="font-weight:700; color:var(--gov-navy); font-size:1rem;">Solar & Clean Energy</div>
+        <div style="font-size:0.775rem; color:var(--text-muted); margin-top:4px;">PM Surya Ghar Muft Bijli</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Featured Flagship Schemes -->
+<section style="padding:48px 0 60px; background:#FFFFFF; border-top:1px solid var(--border-light);">
+  <div class="container">
+    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:28px; flex-wrap:wrap; gap:16px;">
+      <div>
+        <h3 style="font-size:1.6rem; font-weight:800; color:var(--gov-navy);">Featured National Flagship Schemes</h3>
+        <p style="font-size:0.9rem; color:var(--text-muted); margin-top:4px;">Key central initiatives with widespread citizen benefits.</p>
+      </div>
+      <a href="{% url 'schemes:results' %}" class="btn-secondary" style="font-size:0.875rem;">View All Cataloged Schemes &rarr;</a>
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:20px;">
+      {% for scheme in featured_schemes %}
+      <div class="scheme-card" style="margin-bottom:0; display:flex; flex-direction:column; justify-content:space-between;">
+        <div>
+          <span class="scheme-code-badge">{{ scheme.code }}</span>
+          <h4 style="font-size:1.1rem; font-weight:700; color:var(--gov-navy); margin-bottom:6px;">{{ scheme.name }}</h4>
+          <div style="font-size:0.775rem; color:var(--text-muted); margin-bottom:12px;">{{ scheme.ministry }}</div>
+          
+          <div class="benefit-highlight-box" style="margin:10px 0;">
+            <div class="benefit-icon">🪙</div>
+            <div class="benefit-text" style="font-size:0.875rem;">{{ scheme.benefit_highlight }}</div>
+          </div>
+
+          <p style="font-size:0.825rem; color:var(--text-main); line-height:1.45; margin-bottom:14px;">
+            {{ scheme.plain_language_summary|truncatewords:20 }}
+          </p>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border-light); padding-top:12px; margin-top:10px;">
+          <span style="font-size:0.75rem; color:var(--text-muted);">⏱️ {{ scheme.deadline_text }}</span>
+          <a href="{% url 'schemes:scheme_detail' scheme.code %}" class="btn-secondary" style="padding:6px 12px; font-size:0.8rem;">Plain Guide</a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

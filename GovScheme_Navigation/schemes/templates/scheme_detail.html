@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ scheme.name }} — Plain Language Guide & Eligibility{% endblock %}
+
+{% block content %}
+<div class="container" style="padding:32px 20px 60px;">
+  
+  <!-- Breadcrumb -->
+  <div style="font-size:0.825rem; color:var(--text-muted); margin-bottom:16px;">
+    <a href="{% url 'schemes:home' %}" style="color:var(--gov-blue-primary); text-decoration:none;">Home</a> &gt; 
+    <a href="{% url 'schemes:results' %}" style="color:var(--gov-blue-primary); text-decoration:none;">Schemes Directory</a> &gt; 
+    <span style="color:var(--text-main); font-weight:600;">{{ scheme.code }}</span>
+  </div>
+
+  <!-- Header Banner -->
+  <div style="background:#FFFFFF; border:1px solid var(--border-light); border-radius:var(--radius-lg); padding:32px; box-shadow:var(--shadow-sm); margin-bottom:28px;">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:20px;">
+      <div style="max-width:780px;">
+        <span class="scheme-code-badge">{{ scheme.code }} • {{ scheme.sector_category }}</span>
+        <h2 style="font-size:1.85rem; font-weight:800; color:var(--gov-navy); margin-bottom:8px; line-height:1.25;">
+          {{ scheme.name }}
+        </h2>
+        <div style="display:flex; gap:16px; font-size:0.875rem; color:var(--text-muted); flex-wrap:wrap;">
+          <span>🏛️ <strong>Ministry:</strong> {{ scheme.ministry }}</span>
+          <span>📍 <strong>Scope:</strong> {{ scheme.state_scope }}</span>
+          <span>⏳ <strong>Deadline:</strong> {{ scheme.deadline_text }}</span>
+        </div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <button onclick="openQuickApplyModal('{{ scheme.code }}', '{{ scheme.name|escapejs }}')" class="btn-primary" style="padding:12px 24px; font-size:0.95rem;">
+          🚀 1-Click Apply & Track
+        </button>
+        <a href="{{ scheme.official_portal_url }}" target="_blank" rel="noopener" class="btn-secondary" style="justify-content:center; font-size:0.85rem;">
+          Official Govt Portal ↗
+        </a>
+      </div>
+    </div>
+
+    <!-- Highlight Benefit Card -->
+    <div class="benefit-highlight-box" style="margin-top:24px; padding:16px 20px;">
+      <div class="benefit-icon" style="font-size:2rem;">🪙</div>
+      <div>
+        <div style="font-size:0.75rem; text-transform:uppercase; color:var(--text-muted); font-weight:700;">Citizen Benefit Summary</div>
+        <div class="benefit-text" style="font-size:1.15rem;">{{ scheme.benefit_highlight }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Side-by-Side Legal vs Plain-Language AI Translation Card -->
+  <section style="margin-bottom:32px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+      <h3 style="font-size:1.3rem; font-weight:700; color:var(--gov-navy);">
+        ⚖️ Legal Gazette vs Plain Language Translation
+      </h3>
+      <span style="font-size:0.775rem; background:var(--status-success-bg); color:var(--status-success); padding:3px 10px; border-radius:var(--radius-full); font-weight:700; border:1px solid rgba(30,126,52,0.3);">
+        Readability Index: {{ nlp_summary.readability_score }}/100 ({{ nlp_summary.readability_level }})
+      </span>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+      <!-- Left: Gazette Legal Statutory Text -->
+      <div style="background:#F8FAFC; border:1.5px solid var(--border-medium); border-radius:var(--radius-md); padding:20px;">
+        <div style="display:flex; align-items:center; gap:6px; font-size:0.8rem; font-weight:700; color:#64748B; text-transform:uppercase; margin-bottom:12px; letter-spacing:0.04em;">
+          <span>📜</span> Original Gazette / Statutory Text (Legal Terms)
+        </div>
+        <div style="font-family:'Courier New', monospace; font-size:0.825rem; color:#334155; line-height:1.6; background:#FFFFFF; padding:14px; border-radius:var(--radius-sm); border:1px solid var(--border-light); max-height:220px; overflow-y:auto;">
+          {{ scheme.legal_description }}
+        </div>
+        <div style="margin-top:10px; font-size:0.725rem; color:var(--text-muted);">
+          * Official statutory language issued in government gazette notifications.
+        </div>
+      </div>
+
+      <!-- Right: AI Synthesized Plain-Language Explanation -->
+      <div style="background:var(--gov-blue-soft); border:1.5px solid var(--gov-blue-primary); border-radius:var(--radius-md); padding:20px;">
+        <div style="display:flex; align-items:center; gap:6px; font-size:0.8rem; font-weight:700; color:var(--gov-blue-primary); text-transform:uppercase; margin-bottom:12px; letter-spacing:0.04em;">
+          <span>💡</span> Citizen-Friendly Plain English Translation
+        </div>
+        <div style="font-size:0.925rem; color:var(--gov-navy); line-height:1.6; background:#FFFFFF; padding:16px; border-radius:var(--radius-sm); border:1px solid rgba(26,86,148,0.2); max-height:220px; overflow-y:auto; font-weight:500;">
+          {{ scheme.plain_language_summary }}
+        </div>
+        <div style="margin-top:10px; font-size:0.725rem; color:var(--gov-blue-primary); font-weight:600;">
+          ✓ Simplified for 100% clarity. No legal jargon or complex clauses.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Plain Language Eligibility Criteria -->
+  <section style="background:#FFFFFF; border:1px solid var(--border-light); border-radius:var(--radius-md); padding:24px; margin-bottom:28px;">
+    <h3 style="font-size:1.2rem; font-weight:700; color:var(--gov-navy); margin-bottom:16px; display:flex; align-items:center; gap:8px;">
+      <span>✅</span> Who Qualifies to Apply? (Eligibility in Plain Terms)
+    </h3>
+    <ul style="list-style:none; padding:0;">
+      {% for bullet in eligibility_bullets %}
+      <li style="display:flex; align-items:flex-start; gap:8px; margin-bottom:10px; font-size:0.925rem; color:var(--text-main);">
+        <span style="color:var(--status-success); font-weight:700;">✓</span>
+        <span>{{ bullet }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  <!-- Required Documents Checklist -->
+  <section style="background:#FFFFFF; border:1px solid var(--border-light); border-radius:var(--radius-md); padding:24px; margin-bottom:28px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <h3 style="font-size:1.2rem; font-weight:700; color:var(--gov-navy); display:flex; align-items:center; gap:8px;">
+        <span>📄</span> Required Documents Checklist
+      </h3>
+      <button onclick="window.print()" class="btn-secondary" style="font-size:0.775rem; padding:4px 10px;">
+        🖨️ Print Checklist
+      </button>
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:16px;">
+      {% for doc in documents %}
+      <div style="border:1px solid var(--border-light); border-radius:var(--radius-sm); padding:16px; background:#FAFCFE;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:6px;">
+          <h4 style="font-size:0.95rem; font-weight:700; color:var(--gov-navy);">{{ doc.document_name }}</h4>
+          {% if doc.is_mandatory %}
+            <span style="background:#FEE2E2; color:#991B1B; font-size:0.65rem; font-weight:700; padding:2px 6px; border-radius:4px;">Mandatory</span>
+          {% else %}
+            <span style="background:#F1F5F9; color:#475569; font-size:0.65rem; font-weight:700; padding:2px 6px; border-radius:4px;">Optional</span>
+          {% endif %}
+        </div>
+        <p style="font-size:0.825rem; color:var(--text-main); margin-bottom:8px;">
+          {{ doc.why_required }}
+        </p>
+        <div style="font-size:0.75rem; color:var(--text-muted); display:flex; justify-content:space-between; border-top:1px dashed var(--border-light); padding-top:8px;">
+          <span>Authority: {{ doc.issuing_authority }}</span>
+          {% if doc.digilocker_available %}
+            <span style="color:var(--status-success); font-weight:600;">✓ DigiLocker Ready</span>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Step-by-Step Application Process -->
+  <section style="background:#FFFFFF; border:1px solid var(--border-light); border-radius:var(--radius-md); padding:24px; margin-bottom:32px;">
+    <h3 style="font-size:1.2rem; font-weight:700; color:var(--gov-navy); margin-bottom:16px; display:flex; align-items:center; gap:8px;">
+      <span>🚶</span> Step-by-Step Application Process
+    </h3>
+    <ol style="padding-left:20px; font-size:0.925rem; line-height:1.7;">
+      {% for step in steps %}
+      <li style="margin-bottom:10px; color:var(--text-main);">{{ step }}</li>
+      {% endfor %}
+    </ol>
+  </section>
+
+  <!-- Action CTA -->
+  <div style="text-align:center; padding:32px; background:var(--gov-navy); color:#FFFFFF; border-radius:var(--radius-lg);">
+    <h3 style="font-size:1.4rem; font-weight:800; margin-bottom:8px;">Ready to Submit Your Application?</h3>
+    <p style="font-size:0.9rem; color:#CBD5E1; max-width:540px; margin:0 auto 20px;">
+      Generate your official tracking token and start receiving instant SMS & WhatsApp milestone alerts.
+    </p>
+    <div style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap;">
+      <button onclick="openQuickApplyModal('{{ scheme.code }}', '{{ scheme.name|escapejs }}')" class="btn-primary" style="background:linear-gradient(135deg, var(--gov-saffron) 0%, var(--gov-saffron-dark) 100%); color:#000000; font-weight:700; padding:12px 28px;">
+        🚀 1-Click Apply Now
+      </button>
+      <a href="{{ scheme.official_portal_url }}" target="_blank" rel="noopener" class="btn-secondary" style="background:transparent; color:#FFFFFF; border-color:rgba(255,255,255,0.4);">
+        Visit Official Portal ({{ scheme.official_portal_name }}) ↗
+      </a>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
